@@ -1,37 +1,75 @@
 class AlarmClock {
-    constructor(time, id) {
+    constructor() {
         this.alarmCollection = [];
-        this.timerId = id;
-        this.alarmCollection.push(time);
-        //this.timerId.push(id);
-        // let alarmCollection = [];
-        // let timerId = [];
-        // alarmCollection.push(time);
-        // timerId.push(id);
+        this.timerId = undefined; // id текущего таймера
     }
 
     addClock(time, parametrFunction, id) {
         if (id === undefined) {
             throw new Error('Ошибка, id неопределен');
-        } else if (id === this.timerId) {
+        } else if (this.alarmCollection.some((item) => item === id)) { // не выводит true, когда добавляю будильник с id который уже есть в массиве
             console.error('Ошибка, такой id уже есть'); 
+        } else {
+            return this.alarmCollection.push({time, parametrFunction, id});
         }
-        return new AlarmClock(time, id, parametrFunction);
     }
 
     removeClock(id) {
-        let unnecessaryClock = this.timerId.filter(
-            (unnecessary) => unnecessary.this.timerId === id
-        )
-        if (unnecessaryClock === true) {
-            delete this.timerId;
-            console.log ('Удаление произошло успешно');
+        let sourceLength = this.alarmCollection.length;
+        let newAlarmArray = this.alarmCollection.filter(
+            (unnecessary) => unnecessary.id !== id
+        ); 
+        
+        this.alarmCollection = newAlarmArray;
+         
+        if (sourceLength === newAlarmArray.length) {
+            return console.log('Удаление не выполнено, перепроверте id будильника');
         } else {
-            console.log('Будильника с таким id нет');
+            return console.log('Удаление выполенено успешно!');
         }
     }
 
     getCurrentFormattedTime() {
-        return new Date();
+        let currentDate = new Date();
+        let hours = String(currentDate.getHours());
+        let minutes = String(currentDate.getMinutes());
+        return hours + ':' + minutes;
+    }
+
+    start() {
+        function cheackClock(call, callBack) {
+            if(clock.getCurrentFormattedTime() === call) {
+                //необходимо использовать bind2??
+                callBack; //как вызвать колбек определенного массива?
+            }
+        };
+
+        if (this.timerId === undefined) {
+            const cheackTime = () => this.alarmCollection.forEach((item) => cheackClock(item.time, item.parametrFunction));
+            return this.timerId = setInterval(cheackTime, 60000); // каждую минуту будет вызываться проверка 
+        }
+
+    }
+
+    stop() {
+        this.alarmCollection.find(function(item, index, arrey) {
+            if (item.id !== undefined) {
+                clearInterval();
+                delete item.id;
+            }
+        })
+        // if (this.alarmCollection.id !== undefined) {
+        //     clearInterval();
+        //     this.timerId = undefined;
+        // }
+    }
+
+    printAlarms() {
+        this.alarmCollection.forEach((item) => console.log(`${item.id} ${item.time}`));
+    }
+
+    clearAlarms() {
+        clearInterval();
+        this.alarmCollection = [];
     }
 }
