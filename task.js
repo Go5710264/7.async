@@ -5,63 +5,57 @@ class AlarmClock {
     }
 
     addClock(time, parametrFunction, id) {
-        if (id === undefined) {
+        if (!id) {
             throw new Error('Ошибка, id неопределен');
-        } else if (this.alarmCollection.some((item) => item === id)) { // не выводит true, когда добавляю будильник с id который уже есть в массиве
+        } else if (this.alarmCollection.some((item) => item.id === id)) {
             console.error('Ошибка, такой id уже есть'); 
         } else {
-            return this.alarmCollection.push({time, parametrFunction, id});
+            this.alarmCollection.push({time, parametrFunction, id});
         }
     }
 
-    removeClock(id) {
+    removeClock(id) { //готов
         let sourceLength = this.alarmCollection.length;
-        let newAlarmArray = this.alarmCollection.filter(
-            (unnecessary) => unnecessary.id !== id
-        ); 
+        this.alarmCollection = this.alarmCollection.filter((unnecessary) => unnecessary.id !== id); 
         
-        this.alarmCollection = newAlarmArray;
-         
-        if (sourceLength === newAlarmArray.length) {
-            return console.log('Удаление не выполнено, перепроверте id будильника');
-        } else {
-            return console.log('Удаление выполенено успешно!');
-        }
+        return sourceLength === this.alarmCollection.length;
     }
 
-    getCurrentFormattedTime() {
-        let currentDate = new Date();
-        let hours = String(currentDate.getHours());
-        let minutes = String(currentDate.getMinutes());
-        return hours + ':' + minutes;
+    getCurrentFormattedTime() { //готов
+        let currentDate = new Date().toLocaleTimeString("ru-Ru", {
+            hour: "2-digit", 
+            minute: "2-digit",
+          });
+          return console.log(currentDate);
     }
+    
 
     start() {
-        function cheackClock(call, callBack) {
-            if(clock.getCurrentFormattedTime() === call) {
-                //необходимо использовать bind2??
-                callBack; //как вызвать колбек определенного массива?
+
+        let getCurrentFormattedTime = this.getCurrentFormattedTime.bind(this);
+
+        function checkClock(call, func) {
+            if(getCurrentFormattedTime === call) {
+                func();
             }
         };
 
-        if (this.timerId === undefined) {
-            const cheackTime = () => this.alarmCollection.forEach((item) => cheackClock(item.time, item.parametrFunction));
-            return this.timerId = setInterval(cheackTime, 60000); // каждую минуту будет вызываться проверка 
+        // if (this.timerId === undefined) {
+        if (!this.timerId) {
+            const checkTime = () => 
+                this.alarmCollection.forEach((item) => 
+                    checkClock(item.time, item.parametrFunction));
+
+            this.timerId = setInterval(checkTime, 1000);
         }
 
     }
 
     stop() {
-        this.alarmCollection.find(function(item, index, arrey) {
-            if (item.id !== undefined) {
-                clearInterval();
-                delete item.id;
-            }
-        })
-        // if (this.alarmCollection.id !== undefined) {
-        //     clearInterval();
-        //     this.timerId = undefined;
-        // }
+        if (this.timerId) {
+            clearInterval(this.timerId);
+            this.timerId = undefined;
+        }
     }
 
     printAlarms() {
